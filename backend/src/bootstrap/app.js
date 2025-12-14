@@ -1,15 +1,20 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const authRoutes = require("../modules/auth/auth.routes");
+const sweetsRoutes = require("../modules/sweets/sweets.routes");
+
 const app = express();
 
-// Global middlewares
 app.use(cors());
 app.use(express.json());
 
-// Health check (intentional simple endpoint)
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+
+app.use("/api/auth", authRoutes);
+app.use("/api/sweets", sweetsRoutes);
 
 module.exports = app;

@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const { list, add, purchase } = require("./sweets.controller");
 const { requireAuth } = require("../../shared/auth.middleware");
 

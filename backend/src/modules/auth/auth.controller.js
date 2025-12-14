@@ -1,14 +1,15 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../../shared/db");
+const { validateEmailPassword } = require("../../shared/validators");
 
 const register = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password required" });
+  const error = validateEmailPassword(req.body);
+  if (error) {
+    return res.status(400).json({ message: error });
   }
 
+  const { email, password } = req.body;
   const hash = await bcrypt.hash(password, 10);
 
   try {
@@ -33,11 +34,12 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password required" });
+  const error = validateEmailPassword(req.body);
+  if (error) {
+    return res.status(400).json({ message: error });
   }
+
+  const { email, password } = req.body;
 
   const result = await pool.query(
     "SELECT id, password_hash, role FROM users WHERE email = $1",
@@ -64,7 +66,4 @@ const login = async (req, res) => {
   res.json({ token });
 };
 
-
-module.exports = { register };
 module.exports = { register, login };
-
