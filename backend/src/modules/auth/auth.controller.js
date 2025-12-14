@@ -32,4 +32,39 @@ const register = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password required" });
+  }
+
+  const result = await pool.query(
+    "SELECT id, password_hash, role FROM users WHERE email = $1",
+    [email]
+  );
+
+  if (result.rowCount === 0) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  const user = result.rows[0];
+  const match = await bcrypt.compare(password, user.password_hash);
+
+  if (!match) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET || "dev_secret",
+    { expiresIn: "1h" }
+  );
+
+  res.json({ token });
+};
+
+
 module.exports = { register };
+module.exports = { register, login };
+
